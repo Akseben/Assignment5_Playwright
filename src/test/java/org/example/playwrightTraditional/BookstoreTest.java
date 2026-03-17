@@ -21,8 +21,7 @@ public class BookstoreTest {
     static void setup(){
         playwright = Playwright.create();
         browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
-                .setHeadless(false)
-                .setSlowMo(500));
+                .setHeadless(true));
         context = browser.newContext(new Browser.NewContextOptions()
                 .setRecordVideoDir(Paths.get("videos/"))
                 .setRecordVideoSize(1280, 720));
