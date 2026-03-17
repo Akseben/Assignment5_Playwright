@@ -27,7 +27,7 @@ public class BNCollegeBookstoreTest {
     static void setupBrowser() {
         playwright = Playwright.create();
         browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
-                .setHeadless(true));
+                .setHeadless(true)); // ✅ must be true for GitHub Actions
         context = browser.newContext();
         page = context.newPage();
         page.setDefaultTimeout(TIMEOUT);
@@ -156,13 +156,15 @@ public class BNCollegeBookstoreTest {
 
         // Proceed to checkout
         page.getByLabel("Proceed To Checkout").click();
-        page.waitForLoadState(LoadState.DOMCONTENTLOADED);
+        // ✅ Wait for page content to confirm navigation completed
+        page.waitForCondition(() -> page.locator("body").textContent().contains("Create Account"));
 
         // Verify create account page and proceed as guest
         assertTrue(page.locator("body").textContent().contains("Create Account"),
                 "Create Account page should be displayed");
         page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("Proceed As Guest")).click();
-        page.waitForLoadState(LoadState.DOMCONTENTLOADED);
+        // ✅ Wait for contact information page to load
+        page.waitForCondition(() -> page.locator("body").textContent().contains("Contact Information"));
     }
 
     @Test
@@ -181,7 +183,8 @@ public class BNCollegeBookstoreTest {
                 "Order subtotal should be visible");
 
         page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Continue")).click();
-        page.waitForLoadState(LoadState.DOMCONTENTLOADED);
+        // ✅ Wait for pickup page to load
+        page.waitForCondition(() -> page.locator("body").textContent().contains("Pickup"));
     }
 
     @Test
@@ -205,30 +208,32 @@ public class BNCollegeBookstoreTest {
                 "Order subtotal should be visible");
 
         page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Continue")).click();
-        page.waitForLoadState(LoadState.DOMCONTENTLOADED);
+        // ✅ Wait for payment page to load
+        page.waitForCondition(() -> page.locator("body").textContent().contains("Payment") ||
+                page.locator("body").textContent().contains("$164.98"));
     }
 
     @Test
     @Order(9)
     @DisplayName("Continue to payment page and go back to cart")
     void testContinueToPaymentAndReturn() {
-        String pageContent = page.locator("body").textContent();
-        assertTrue(pageContent.contains("$164.98"),
+        assertTrue(page.locator("body").textContent().contains("$164.98"),
                 "Order subtotal should be visible on payment page");
-        assertTrue(pageContent.contains("JBL Quantum True Wireless"),
+        assertTrue(page.locator("body").textContent().contains("JBL Quantum True Wireless"),
                 "Product name should be visible on payment page");
 
         // ✅ Use href pattern instead of link text which may vary on payment page
         page.locator("a[href*='cart']").first().click();
         page.waitForURL("**/cart**");
-        page.waitForLoadState(LoadState.DOMCONTENTLOADED);
+        // ✅ Wait for cart page to fully load
+        page.waitForCondition(() -> page.locator("body").textContent().contains("Your Shopping Cart"));
     }
 
     @Test
     @Order(10)
     @DisplayName("Delete the item and assert cart is empty")
     void testDeleteItemAndVerifyEmptyCart() {
-        // ✅ Wait for cart page to fully load before looking for remove button
+        // ✅ Wait for cart page and remove button to be ready
         page.waitForCondition(() -> page.locator("body").textContent().contains("Your Shopping Cart"));
         page.waitForSelector("[aria-label*='Remove product JBL Quantum']");
         page.getByLabel("Remove product JBL Quantum").click();
