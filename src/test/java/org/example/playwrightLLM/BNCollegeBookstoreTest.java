@@ -1,5 +1,6 @@
 package org.example.playwrightLLM;
 
+import java.nio.file.Paths;
 import com.microsoft.playwright.*;
 import com.microsoft.playwright.options.AriaRole;
 import com.microsoft.playwright.options.LoadState;
@@ -28,7 +29,9 @@ public class BNCollegeBookstoreTest {
         playwright = Playwright.create();
         browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
                 .setHeadless(true)); // ✅ must be true for GitHub Actions
-        context = browser.newContext();
+        context = browser.newContext(new Browser.NewContextOptions()
+                .setRecordVideoDir(Paths.get("videos/"))
+                .setRecordVideoSize(1280, 720));
         page = context.newPage();
         page.setDefaultTimeout(TIMEOUT);
         page.setDefaultNavigationTimeout(TIMEOUT);
