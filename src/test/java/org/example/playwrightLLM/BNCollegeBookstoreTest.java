@@ -27,7 +27,7 @@ public class BNCollegeBookstoreTest {
     static void setupBrowser() {
         playwright = Playwright.create();
         browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
-                .setHeadless(false));
+                .setHeadless(true));
         context = browser.newContext();
         page = context.newPage();
         page.setDefaultTimeout(TIMEOUT);
